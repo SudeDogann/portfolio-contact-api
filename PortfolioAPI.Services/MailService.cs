@@ -9,27 +9,35 @@ namespace PortfolioAPI.Services
     {
         public async Task SendEmailAsync(ContactRequest request)
         {
-            var email = new MimeMessage();
-
-            email.From.Add(new MailboxAddress("Portfolio Contact", "sudedogaan1@gmail.com"));
-            email.To.Add(new MailboxAddress("Sude", "sudedogaan1@gmail.com"));
-
-            email.Subject = $"Portfolio Contact from {request.Name}";
-
-            email.Body = new TextPart("plain")
+            try
             {
-                Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
-            };
+                var email = new MimeMessage();
 
-            using var smtp = new SmtpClient();
+                email.From.Add(new MailboxAddress("Portfolio Contact", "sudedogaan1@gmail.com"));
+                email.To.Add(new MailboxAddress("Sude", "sudedogaan1@gmail.com"));
 
-            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                email.Subject = $"Portfolio Contact from {request.Name}";
 
-            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
+                email.Body = new TextPart("plain")
+                {
+                    Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
+                };
 
-            await smtp.SendAsync(email);
+                using var smtp = new SmtpClient();
 
-            await smtp.DisconnectAsync(true);
+                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+
+                await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "APP_PASSWORD");
+
+                await smtp.SendAsync(email);
+
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SMTP ERROR: " + ex.ToString());
+                throw;
+            }
         }
     }
 }
