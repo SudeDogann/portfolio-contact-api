@@ -2,16 +2,17 @@
 WORKDIR /src
 
 COPY ["PortfolioAPI/PortfolioAPI.csproj", "PortfolioAPI/"]
-COPY ["PortfolioAPI.Models/PortfolioAPI.Models.csproj", "PortfolioAPI.Models/"]
-COPY ["PortfolioAPI.Services/PortfolioAPI.Services.csproj", "PortfolioAPI.Services/"]
+COPY ["Models/PortfolioAPI.Models.csproj", "Models/"]
+COPY ["Services/PortfolioAPI.Services.csproj", "Services/"]
 
 RUN dotnet restore "PortfolioAPI/PortfolioAPI.csproj"
 
 COPY . .
 WORKDIR "/src/PortfolioAPI"
-RUN dotnet publish "PortfolioAPI.csproj" -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "PortfolioAPI.dll"]
