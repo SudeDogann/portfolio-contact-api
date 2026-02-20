@@ -9,35 +9,29 @@ namespace PortfolioAPI.Services
     {
         public async Task SendEmailAsync(ContactRequest request)
         {
-            try
+            var email = new MimeMessage();
+
+            email.From.Add(new MailboxAddress("Portfolio Contact", "sudedogaan1@gmail.com"));
+            email.To.Add(new MailboxAddress("Sude", "sudedogaan1@gmail.com"));
+
+            email.Subject = $"Portfolio Contact from {request.Name}";
+
+            email.Body = new TextPart("plain")
             {
-                var email = new MimeMessage();
+                Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
+            };
 
-                email.From.Add(new MailboxAddress("Portfolio Contact", "sudedogaan1@gmail.com"));
-                email.To.Add(new MailboxAddress("Sude", "sudedogaan1@gmail.com"));
+            using var smtp = new SmtpClient();
 
-                email.Subject = $"Portfolio Contact from {request.Name}";
+            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                email.Body = new TextPart("plain")
-                {
-                    Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
-                };
+            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
 
-                using var smtp = new SmtpClient();
+            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
 
-                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.SendAsync(email);
 
-                await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "APP_PASSWORD");
-
-                await smtp.SendAsync(email);
-
-                await smtp.DisconnectAsync(true);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("SMTP ERROR: " + ex.ToString());
-                throw;
-            }
+            await smtp.DisconnectAsync(true);
         }
     }
 }
