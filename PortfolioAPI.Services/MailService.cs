@@ -38,11 +38,11 @@ namespace PortfolioAPI.Services
                 };
 
                 using var smtp = new SmtpClient();
-
+                smtp.Timeout = 30000;
                 // Render (Linux) üzerinde sertifika hatalarını önlemek için kritik satır:
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await smtp.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+                await smtp.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.SslOnConnect);
                 await smtp.AuthenticateAsync(smtpUser, smtpPass);
                 await smtp.SendAsync(email);
                 await smtp.DisconnectAsync(true);
