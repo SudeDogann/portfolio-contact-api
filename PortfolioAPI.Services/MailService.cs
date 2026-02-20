@@ -25,7 +25,7 @@ namespace PortfolioAPI.Services
 
             await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
 
-            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "APP_PASSWORD_BURAYA");
+            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
 
             await smtp.SendAsync(email);
 
