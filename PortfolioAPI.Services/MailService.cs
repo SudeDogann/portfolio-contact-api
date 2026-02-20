@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using PortfolioAPI.Models;
 
@@ -21,11 +22,14 @@ namespace PortfolioAPI.Services
             };
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, false);
+
+            // 🔥 EN KRİTİK SATIR
+            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
             await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
+
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
         }
-
     }
 }
