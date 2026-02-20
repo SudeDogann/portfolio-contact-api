@@ -2,12 +2,13 @@
 WORKDIR /src
 
 COPY ["PortfolioAPI/PortfolioAPI.csproj", "PortfolioAPI/"]
-COPY ["Models/PortfolioAPI.Models.csproj", "Models/"]
-COPY ["Services/PortfolioAPI.Services.csproj", "Services/"]
+COPY ["PortfolioAPI.Models/PortfolioAPI.Models.csproj", "PortfolioAPI.Models/"]
+COPY ["PortfolioAPI.Services/PortfolioAPI.Services.csproj", "PortfolioAPI.Services/"]
 
 RUN dotnet restore "PortfolioAPI/PortfolioAPI.csproj"
 
 COPY . .
+
 WORKDIR "/src/PortfolioAPI"
 RUN dotnet publish -c Release -o /app/publish
 
