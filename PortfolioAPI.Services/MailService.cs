@@ -23,12 +23,12 @@ namespace PortfolioAPI.Services
 
             using var smtp = new SmtpClient();
 
-            // 🔥 EN KRİTİK SATIR
             await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
 
-            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
+            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "APP_PASSWORD_BURAYA");
 
             await smtp.SendAsync(email);
+
             await smtp.DisconnectAsync(true);
         }
     }
