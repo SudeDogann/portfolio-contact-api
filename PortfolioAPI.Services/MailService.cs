@@ -2,36 +2,57 @@
 using MailKit.Security;
 using MimeKit;
 using PortfolioAPI.Models;
+using Microsoft.Extensions.Configuration; // Bunu eklemeyi unutma
 
 namespace PortfolioAPI.Services
 {
     public class MailService
     {
+        private readonly IConfiguration _configuration;
+
+        // Constructor ile Configuration'ı içeri alıyoruz
+        public MailService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public async Task SendEmailAsync(ContactRequest request)
         {
-            var email = new MimeMessage();
-
-            email.From.Add(new MailboxAddress("Portfolio Contact", "sudedogaan1@gmail.com"));
-            email.To.Add(new MailboxAddress("Sude", "sudedogaan1@gmail.com"));
-
-            email.Subject = $"Portfolio Contact from {request.Name}";
-
-            email.Body = new TextPart("plain")
+            try
             {
-                Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
-            };
+                var email = new MimeMessage();
 
-            using var smtp = new SmtpClient();
+                // Environment'tan verileri çekiyoruz
+                var smtpUser = _configuration["SMTP_USER"];
+                var smtpPass = _configuration["SMTP_PASS"];
+                var smtpHost = _configuration["SMTP_HOST"];
+                var smtpPort = int.Parse(_configuration["SMTP_PORT"] ?? "587");
 
-            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                email.From.Add(new MailboxAddress("Portfolio Contact", smtpUser));
+                email.To.Add(new MailboxAddress("Sude", smtpUser));
+                email.Subject = $"Portfolio Contact from {request.Name}";
 
-            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                email.Body = new TextPart("plain")
+                {
+                    Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
+                };
 
-            await smtp.AuthenticateAsync("sudedogaan1@gmail.com", "iusy mitz zvot vqvj");
+                using var smtp = new SmtpClient();
 
-            await smtp.SendAsync(email);
+                // Render (Linux) üzerinde sertifika hatalarını önlemek için kritik satır:
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await smtp.DisconnectAsync(true);
+                await smtp.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(smtpUser, smtpPass);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                // Render loglarında hatayı görmek için
+                Console.WriteLine($"Mail Error: {ex.Message}");
+                throw;
+            }
         }
     }
 }

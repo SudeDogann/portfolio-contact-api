@@ -10,9 +10,9 @@ namespace PortfolioContactApi.Controllers
     {
         private readonly MailService _mailService;
 
-        public ContactController()
+        public ContactController(MailService mailService)
         {
-            _mailService = new MailService();
+            _mailService = mailService;
         }
 
         [HttpPost]
