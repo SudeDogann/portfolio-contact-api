@@ -1,33 +1,44 @@
 using PortfolioAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Mail Service
 builder.Services.AddScoped<MailService>();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            policy.WithOrigins(
+                "http://localhost:5173",
+                "https://yourfrontenddomain.com"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
         });
 });
+
+// Render için PORT
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
+
 var app = builder.Build();
 
-app.UseCors("AllowReact");
-// Configure the HTTP request pipeline.
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// CORS
+app.UseCors("AllowReact");
 
 app.UseAuthorization();
 

@@ -18,42 +18,29 @@ namespace PortfolioAPI.Services
 
         public async Task SendEmailAsync(ContactRequest request)
         {
-            try
+            var smtpUser = _configuration["SMTP_USER"];
+            var smtpPass = _configuration["SMTP_PASS"];
+            var smtpHost = _configuration["SMTP_HOST"];
+            var smtpPort = int.Parse(_configuration["SMTP_PORT"] ?? "587");
+
+            var email = new MimeMessage();
+
+            email.From.Add(new MailboxAddress("Portfolio Contact", smtpUser));
+            email.To.Add(new MailboxAddress("Sude", smtpUser));
+            email.Subject = $"Portfolio Contact from {request.Name}";
+
+            email.Body = new TextPart("plain")
             {
-                var email = new MimeMessage();
+                Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
+            };
 
-                // Environment'tan verileri çekiyoruz
-                var smtpUser = _configuration["SMTP_USER"];
-                var smtpPass = _configuration["SMTP_PASS"];
-                var smtpHost = _configuration["SMTP_HOST"];
-                var smtpPort = int.Parse(_configuration["SMTP_PORT"] ?? "587");
+            using var smtp = new SmtpClient();
 
-                email.From.Add(new MailboxAddress("Portfolio Contact", smtpUser));
-                email.To.Add(new MailboxAddress("Sude", smtpUser));
-                email.Subject = $"Portfolio Contact from {request.Name}";
-
-                email.Body = new TextPart("plain")
-                {
-                    Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
-                };
-
-                using var smtp = new SmtpClient();
-                smtp.Timeout = 60000;
-                // Render (Linux) üzerinde sertifika hatalarını önlemek için kritik satır:
-                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                smtp.LocalDomain = "localhost";
-
-                await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                await smtp.AuthenticateAsync(smtpUser, smtpPass);
-                await smtp.SendAsync(email);
-               
-            }
-            catch (Exception ex)
-            {
-                // Render loglarında hatayı görmek için
-                Console.WriteLine($"Mail Error: {ex.Message}");
-                throw;
-            }
+            await smtp.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(smtpUser, smtpPass);
+            await smtp.SendAsync(email);
+            await smtp.DisconnectAsync(true);
         }
+
     }
 }
