@@ -19,7 +19,7 @@ namespace PortfolioAPI.Services
                 var email = new EmailMessage
                 {
                     From = "onboarding@resend.dev",
-                    To = "yourmail@gmail.com",
+                    To = "sudedogaan1@gmail.com",
                     Subject = $"Portfolio message from {request.Name}",
                     HtmlBody = $@"
                         <h2>New Portfolio Message</h2>
