@@ -1,46 +1,42 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+﻿using Resend;
 using PortfolioAPI.Models;
-using Microsoft.Extensions.Configuration; // Bunu eklemeyi unutma
 
 namespace PortfolioAPI.Services
 {
     public class MailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly ResendClient _resend;
 
-        // Constructor ile Configuration'ı içeri alıyoruz
-        public MailService(IConfiguration configuration)
+        public MailService(ResendClient resend)
         {
-            _configuration = configuration;
+            _resend = resend;
         }
 
         public async Task SendEmailAsync(ContactRequest request)
         {
-            var smtpUser = _configuration["SMTP_USER"];
-            var smtpPass = _configuration["SMTP_PASS"];
-            var smtpHost = _configuration["SMTP_HOST"];
-            var smtpPort = int.Parse(_configuration["SMTP_PORT"] ?? "587");
-
-            var email = new MimeMessage();
-
-            email.From.Add(new MailboxAddress("Portfolio Contact", smtpUser));
-            email.To.Add(new MailboxAddress("Sude", smtpUser));
-            email.Subject = $"Portfolio Contact from {request.Name}";
-
-            email.Body = new TextPart("plain")
+            try
             {
-                Text = $"Name: {request.Name}\nEmail: {request.Email}\nMessage: {request.Message}"
-            };
+                var email = new EmailMessage
+                {
+                    From = "onboarding@resend.dev",
+                    To = "yourmail@gmail.com",
+                    Subject = $"Portfolio message from {request.Name}",
+                    HtmlBody = $@"
+                        <h2>New Portfolio Message</h2>
+                        <p><strong>Name:</strong> {request.Name}</p>
+                        <p><strong>Email:</strong> {request.Email}</p>
+                        <p><strong>Message:</strong></p>
+                        <p>{request.Message}</p>
+                    "
+                };
 
-            using var smtp = new SmtpClient();
-
-            await smtp.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(smtpUser, smtpPass);
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
+                await _resend.EmailSendAsync(email);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Mail Error: {ex}");
+                throw;
+            }
         }
-
     }
 }
