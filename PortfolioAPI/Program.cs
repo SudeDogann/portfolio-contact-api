@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 // Resend configuration
 builder.Services.Configure<ResendClientOptions>(options =>
 {
-    options.ApiToken = builder.Configuration["re_eEn4QzhE_4VV633i87hpzqVfXXarLiekk"];
+    options.ApiToken = builder.Configuration["RESEND_API_KEY"];
 });
 
 // Resend HttpClient
